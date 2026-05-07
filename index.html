@@ -4,7 +4,106 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>로또 번호 자동 생성기</title>
-  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #facc15, #fb923c);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #222;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 700px;
+      background: white;
+      padding: 40px 25px;
+      border-radius: 24px;
+      text-align: center;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #555;
+      margin-bottom: 30px;
+    }
+
+    button {
+      border: none;
+      background: #ef4444;
+      color: white;
+      padding: 14px 32px;
+      border-radius: 30px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 30px;
+    }
+
+    button:hover {
+      background: #dc2626;
+    }
+
+    .lotto-result {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .lotto-set {
+      background: #f8fafc;
+      padding: 18px;
+      border-radius: 16px;
+    }
+
+    .lotto-title {
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .numbers {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ball {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 30px 15px;
+      }
+
+      .ball {
+        width: 42px;
+        height: 42px;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -14,11 +113,58 @@
 
     <button id="generate-btn">번호 생성하기</button>
 
-    <div id="lotto-result" class="lotto-result">
-      <!-- 로또 번호가 여기에 표시됩니다 -->
-    </div>
+    <div id="lotto-result" class="lotto-result"></div>
   </div>
 
-  <script src="main.js"></script>
+  <script>
+    const generateBtn = document.getElementById("generate-btn");
+    const lottoResult = document.getElementById("lotto-result");
+
+    function createLottoNumbers() {
+      const numbers = [];
+
+      while (numbers.length < 6) {
+        const randomNumber = Math.floor(Math.random() * 45) + 1;
+
+        if (!numbers.includes(randomNumber)) {
+          numbers.push(randomNumber);
+        }
+      }
+
+      return numbers.sort((a, b) => a - b);
+    }
+
+    function generateLottoSets() {
+      lottoResult.innerHTML = "";
+
+      for (let i = 1; i <= 5; i++) {
+        const lottoNumbers = createLottoNumbers();
+
+        const lottoSet = document.createElement("div");
+        lottoSet.className = "lotto-set";
+
+        const title = document.createElement("div");
+        title.className = "lotto-title";
+        title.textContent = `추천 번호 ${i}`;
+
+        const numbersDiv = document.createElement("div");
+        numbersDiv.className = "numbers";
+
+        lottoNumbers.forEach((number) => {
+          const ball = document.createElement("div");
+          ball.className = "ball";
+          ball.textContent = number;
+          numbersDiv.appendChild(ball);
+        });
+
+        lottoSet.appendChild(title);
+        lottoSet.appendChild(numbersDiv);
+        lottoResult.appendChild(lottoSet);
+      }
+    }
+
+    generateBtn.addEventListener("click", generateLottoSets);
+  </script>
+
 </body>
 </html>
