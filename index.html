@@ -1,46 +1,93 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>로또 번호 자동 생성기</title>
 
   <style>
+    :root[data-theme="light"] {
+      --bg-gradient: linear-gradient(135deg, #facc15, #fb923c);
+      --container-bg: #ffffff;
+      --text-primary: #222222;
+      --text-secondary: #555555;
+      --lotto-set-bg: #f8fafc;
+      --toggle-bg: #e2e8f0;
+      --toggle-icon: "🌙";
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    }
+
+    :root[data-theme="dark"] {
+      --bg-gradient: linear-gradient(135deg, #1e1b4b, #312e81);
+      --container-bg: #1e293b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --lotto-set-bg: #0f172a;
+      --toggle-bg: #334155;
+      --toggle-icon: "☀️";
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+
     * {
       box-sizing: border-box;
+      transition: background 0.3s, color 0.3s, background-color 0.3s;
     }
 
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #facc15, #fb923c);
+      background: var(--bg-gradient);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: #222;
+      color: var(--text-primary);
     }
 
     .container {
       width: 90%;
       max-width: 700px;
-      background: white;
+      background: var(--container-bg);
       padding: 40px 25px;
       border-radius: 24px;
       text-align: center;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--toggle-bg);
+      border: none;
+      border-radius: 50px;
+      padding: 8px 16px;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-primary);
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .theme-toggle:hover {
+      opacity: 0.8;
     }
 
     h1 {
       margin-bottom: 10px;
+      color: var(--text-primary);
     }
 
     p {
-      color: #555;
+      color: var(--text-secondary);
       margin-bottom: 30px;
     }
 
-    button {
+    .generate-btn {
       border: none;
       background: #ef4444;
       color: white;
@@ -52,7 +99,7 @@
       margin-bottom: 30px;
     }
 
-    button:hover {
+    .generate-btn:hover {
       background: #dc2626;
     }
 
@@ -63,7 +110,7 @@
     }
 
     .lotto-set {
-      background: #f8fafc;
+      background: var(--lotto-set-bg);
       padding: 18px;
       border-radius: 16px;
     }
@@ -71,6 +118,7 @@
     .lotto-title {
       font-weight: bold;
       margin-bottom: 12px;
+      color: var(--text-primary);
     }
 
     .numbers {
@@ -84,7 +132,6 @@
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: #2563eb;
       color: white;
       display: flex;
       justify-content: center;
@@ -108,10 +155,15 @@
 <body>
 
   <div class="container">
+    <button class="theme-toggle" id="theme-toggle">
+      <span id="theme-icon">🌙</span>
+      <span id="theme-label">다크모드</span>
+    </button>
+
     <h1>🎰 로또 번호 자동 생성기</h1>
     <p>버튼을 누르면 로또 번호 5세트가 자동으로 생성됩니다.</p>
 
-    <button id="generate-btn">번호 생성하기</button>
+    <button class="generate-btn" id="generate-btn">번호 생성하기</button>
 
     <div id="lotto-result" class="lotto-result"></div>
   </div>
@@ -119,27 +171,56 @@
   <script>
     const generateBtn = document.getElementById("generate-btn");
     const lottoResult = document.getElementById("lotto-result");
+    const themeToggle = document.getElementById("theme-toggle");
+    const themeIcon = document.getElementById("theme-icon");
+    const themeLabel = document.getElementById("theme-label");
+    const html = document.documentElement;
+
+    const savedTheme = localStorage.getItem("theme") || "light";
+    applyTheme(savedTheme);
+
+    function applyTheme(theme) {
+      html.setAttribute("data-theme", theme);
+      if (theme === "dark") {
+        themeIcon.textContent = "☀️";
+        themeLabel.textContent = "라이트모드";
+      } else {
+        themeIcon.textContent = "🌙";
+        themeLabel.textContent = "다크모드";
+      }
+      localStorage.setItem("theme", theme);
+    }
+
+    themeToggle.addEventListener("click", () => {
+      const current = html.getAttribute("data-theme");
+      applyTheme(current === "light" ? "dark" : "light");
+    });
+
+    const ballColors = [
+      { max: 10, color: "#ef4444" },
+      { max: 20, color: "#f97316" },
+      { max: 30, color: "#eab308" },
+      { max: 40, color: "#22c55e" },
+      { max: 45, color: "#3b82f6" },
+    ];
+
+    function getBallColor(number) {
+      return ballColors.find(({ max }) => number <= max).color;
+    }
 
     function createLottoNumbers() {
       const numbers = [];
-
       while (numbers.length < 6) {
-        const randomNumber = Math.floor(Math.random() * 45) + 1;
-
-        if (!numbers.includes(randomNumber)) {
-          numbers.push(randomNumber);
-        }
+        const n = Math.floor(Math.random() * 45) + 1;
+        if (!numbers.includes(n)) numbers.push(n);
       }
-
       return numbers.sort((a, b) => a - b);
     }
 
     function generateLottoSets() {
       lottoResult.innerHTML = "";
-
       for (let i = 1; i <= 5; i++) {
         const lottoNumbers = createLottoNumbers();
-
         const lottoSet = document.createElement("div");
         lottoSet.className = "lotto-set";
 
@@ -153,6 +234,7 @@
         lottoNumbers.forEach((number) => {
           const ball = document.createElement("div");
           ball.className = "ball";
+          ball.style.background = getBallColor(number);
           ball.textContent = number;
           numbersDiv.appendChild(ball);
         });
